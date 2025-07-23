@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İstanbul Haritası: Yorumlar 💬 ve İlanlar 🏠</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #menuBox {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    #menuBox h3 {
+      margin: 0 0 10px 0;
+    }
+    #menuBox button {
+      margin: 5px;
+      padding: 10px 15px;
+      background: #4285F4;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #menuBox button:hover {
+      background: #2a65c0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Menü Overlay -->
+  <div id="overlay">
+    <div id="menuBox">
+      <h3>Ne yapmak istiyorsun?</h3>
+      <button onclick="addComment()">💬 Yorum Yap</button>
+      <button onclick="addListing()">🏠 İlan Paylaş</button>
+      <button onclick="closeOverlay()">İptal</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([41.0082, 28.9784], 12);
+
+    // Renkli Carto Tile Layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(map);
+
+    // İkonlar
+    const commentIcon = L.icon({
+      iconUrl: 'https://cdn-icons-png.flaticon.com/512/9131/9131484.png',
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -28]
+    });
+
+    const houseIcon = L.icon({
+      iconUrl: 'https://png.pngtree.com/png-vector/20230130/ourmid/pngtree-location-home-icon-pin-deal-clipart-png-image_6575743.png',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    });
+
+    let selectedLatLng = null;
+
+    // Haritaya tıklayınca overlay göster
+    map.on('click', function(e) {
+      selectedLatLng = e.latlng;
+      document.getElementById("overlay").style.display = "flex";
+    });
+
+    function addComment() {
+      const text = prompt("Yorumunuzu yazın:");
+      if (text) {
+        const marker = L.marker(selectedLatLng, { icon: commentIcon }).addTo(map);
+        marker.bindPopup(`💬 <b>Yorum:</b> ${text}`).openPopup();
+      }
+      closeOverlay();
+    }
+
+    function addListing() {
+      const desc = prompt("İlan açıklamasını yazın:");
+      const photoUrl = prompt("Fotoğraf URL’si girin (örnek: https://placehold.co/300x200):");
+      if (desc && photoUrl) {
+        const marker = L.marker(selectedLatLng, { icon: houseIcon }).addTo(map);
+        marker.bindPopup(`
+          🏠 <b>İlan:</b> ${desc}<br>
+          <img src="${photoUrl}" style="width:100%; height:auto; border-radius:5px;">
+        `).openPopup();
+      }
+      closeOverlay();
+    }
+
+    function closeOverlay() {
+      document.getElementById("overlay").style.display = "none";
+    }
+  </script>
+</body>
+</html>
